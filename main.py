@@ -1,5 +1,6 @@
 import os
 import function
+import json
 from neo4j import GraphDatabase, basic_auth
 from flask import Flask, app, jsonify, request
 
@@ -56,7 +57,80 @@ def create_utilisateur():
 
     return jsonify({'success': "True"})
 
-# Android - Connexion
+# recuperer la liste des objets IoT
+@app.route('/api/objets', methods=['GET'])
+def get_objets():
+    graph = Database_connect()
+    query = f"MATCH (u:Object) RETURN *"
+    print(query)
+    with graph.session() as session:
+        result = session.run(query)
+
+        for record in result:
+            objets = {}
+
+            for key in record["u"].keys():
+                print(key)
+                objets[key] = record["u"][key]
+
+        return jsonify({'objets': objets})
+
+# recuperer les infos d'un composant par son id
+@app.route('/api/objet', methods=['GET'])
+def get_objet():
+    graph = Database_connect()
+    id = request.args.get('id', default = 1, type = int)
+    query = f"MATCH (u:Objet) WHERE u.id_obj = {id} RETURN u"
+    with graph.session() as session:
+        result = session.run(query)
+
+        for record in result:
+            composant = {}
+
+            for key in record["u"].keys():
+                composant[key] = record["u"][key]
+
+            print(composant)
+            return jsonify({'composant': composant})
+
+
+# recuperer la liste des objets IoT
+@app.route('/api/objets', methods=['GET'])
+def get_objets():
+    graph = Database_connect()
+    query = f"MATCH (u:Object) RETURN *"
+    print(query)
+    with graph.session() as session:
+        result = session.run(query)
+
+        for record in result:
+            objets = {}
+
+            for key in record["u"].keys():
+                print(key)
+                objets[key] = record["u"][key]
+
+        return jsonify({'objets': objets})
+
+# recuperer les infos d'un composant par son id
+@app.route('/api/objet', methods=['GET'])
+def get_objet():
+    graph = Database_connect()
+    id = request.args.get('id', default = 1, type = int)
+    query = f"MATCH (u:Objet) WHERE u.id_obj = {id} RETURN u"
+    with graph.session() as session:
+        result = session.run(query)
+
+        for record in result:
+            composant = {}
+
+            for key in record["u"].keys():
+                composant[key] = record["u"][key]
+
+            print(composant)
+            return jsonify({'composant': composant})
+
+
 @app.route('/connexion', methods=['POST'])
 def get_android_connexion():
     graph = Database_connect()
@@ -66,9 +140,6 @@ def get_android_connexion():
     password = request.form.get('password')
 
     print(email, password)
-
-
-    # query = f"match (u:Utilisateur) where u.mail_util = {email} AND u.password = {password} RETURN u"
 
     query = """MATCH (u:Utilisateur {mail_util: $mail, password : $password}) RETURN COUNT(u) AS count"""
     print(query)
@@ -103,7 +174,59 @@ def get_objects():
                 objects[key] = record["u"][key]
 
         return jsonify({'objects': objects})
+# SDC - Ajout d'un objet
+@app.route('/sdc/ajout', methods=['POST'])
+def sdc_ajout():
+    graph = Database_connect()
+    data = request.get_json()
+    #print(data)
 
+    
+    #query = """MATCH (u: Utilisateur {mail_util: $mail, password : $password}) RETURN u.id_util as user_id"""
+    #print(query)
+
+    #with graph.session() as session:
+    #    result = session.run(query, mail=mail, password= function.encrypt_password(password))
+    #    if result.single():
+    #        reponse = jsonify({'succes': True})
+    #    else:
+    #        reponse = jsonify({'succes': False})
+
+    graph.close()
+    return "reponse"
+
+# SDC - Requete routine
+@app.route('/sdc/routine', methods=['POST'])
+def sdc_routine():
+    graph = Database_connect()
+    data = request.get_json()
+    print(data)
+
+    composants = data.get('composants')
+    
+    if composants:
+        for composant in composants :
+            c_idObjet = composant.get("idObjet")
+            c_libelleObjet = composant.get("libelleObjet")
+            c_date_comp = composant.get("lastConnect")
+            c_fonctions = composant.get("fonctions")
+            #print(str(c_idObjet) + "/" + c_libelleObjet + "/" + c_date_comp)
+
+            query = """MATCH (u: Objet {id_obj: $idObjet}) RETURN u"""
+
+            with graph.session() as session:
+                result = session.run(query, idObjet=c_idObjet)
+                if result.single():
+                    query2 = """MATCH (n:Objet {id_obj: $idObjet}) SET """
+                    set_clause = ''
+                    for fonction in c_fonctions :
+                        set_clause += f"n.{fonction.get('libelle')} = '{json.dumps(fonction)}', "
+                    set_clause = set_clause.rstrip(", ")
+                    query2 += set_clause
+                    #print(query2)
+                    result2 = session.run(query2, idObjet=c_idObjet)
+    graph.close()
+    return jsonify({'succes': True})
 
 if __name__ == '__main__':
     port = int(os.environ.get("PORT", 5000))
