@@ -50,37 +50,40 @@ def create_utilisateur():
     mail_util = request.form.get('mail_util')
     password = request.form.get('password')
 
-    
     with graph.session() as session:
-        query = f"CREATE (p:Utilisateur {{id_util: '{id_util}', nom_util: '{nom_util}', prenom_util: '{prenom_util}', mail_util: '{mail_util}', password: '{function.encrypt_password(password)}'}})"
+        query = f"CREATE (p:Utilisateur {{id_util: '{id_util}', nom_util: '{nom_util}', prenom_util: '{prenom_util}', mail_util: '{mail_util}', password: '{password}'}})"
         result = session.run(query)
 
-    return jsonify({'succes': True})
-
+    return jsonify({'success': "True"})
 
 # Android - Connexion
 @app.route('/connexion', methods=['POST'])
 def get_android_connexion():
     graph = Database_connect()
-    data = request.get_json()
-    print(data)
+    #data = request.get_json()
 
-    mail = data.get('mail')
-    password = data.get('password')
+    email = request.form.get('mail_util')
+    password = request.form.get('password')
 
-    query = """MATCH (u:Utilisateur {mail_util: $mail, password : $password}) RETURN u.id_util as user_id"""
+    print(email, password)
+
+
+    # query = f"match (u:Utilisateur) where u.mail_util = {email} AND u.password = {password} RETURN u"
+
+    query = """MATCH (u:Utilisateur {mail_util: $mail, password : $password}) RETURN COUNT(u) AS count"""
     print(query)
 
     with graph.session() as session:
-        result = session.run(query, mail=mail, password= function.encrypt_password(password))
-        if result.single():
-            reponse = jsonify({'succes': True})
+        result = session.run(query,  mail=email, password=password)
+        count = result.single()["count"]
+
+        if count > 0:
+            reponse = jsonify({"success": "True"})
         else:
-            reponse = jsonify({'succes': False})
+            reponse = jsonify({'success': "False"})
 
     graph.close()
     return reponse
-
 
 # recuperer la liste des objets IoT
 @app.route('/objects', methods=['GET'])
@@ -104,4 +107,4 @@ def get_objects():
 
 if __name__ == '__main__':
     port = int(os.environ.get("PORT", 5000))
-    app.run(host='0.0.0.0', port=port)
+    app.run(host='192.168.137.165', port=port)
