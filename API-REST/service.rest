@@ -1,5 +1,8 @@
 ###
-GET http://10.10.8.219:5000/utilisateur?id=100
+GET http://192.168.1.78:5000/utilisateur?id=100
+
+###
+GET http://192.168.1.78:5000/object?id=100
 
 ###
 POST http://10.10.8.219:5000/utilisateur
@@ -13,8 +16,7 @@ Content-Type: application/json
     "prenom_util": "John"
 }
 
-###
-POST http://10.10.8.219:5000/connexion
+POST http://192.168.1.78:5000/connexion
 Content-Type: application/json
 
 {
@@ -23,4 +25,4 @@ Content-Type: application/json
 }
 
 ###
-GET http://10.10.8.219:5000/objects
+GET http://192.168.1.78:5000/objects
