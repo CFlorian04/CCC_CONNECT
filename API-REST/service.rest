@@ -1,14 +1,26 @@
-# GET request
-GET http://192.168.0.45:5000/api/utilisateur?id=100
+# # GET request
+# GET http://10.10.8.219:5000/utilisateur?id=100
 
 # POST request
-POST http://192.168.0.45:5000/api/utilisateur
+POST http://192.168.137.165:5000/utilisateur
 Content-Type: application/json
 
 {
-    "id_util": "102",
+    "id_util": 109,
     "mail_util": "martin@gmail.com",
     "nom_util": "Martin",
     "password": "Xg5r7d",
     "prenom_util": "John"
 }
+
+# # POST request
+# POST http://10.10.8.219:5000/connexion
+# Content-Type: application/json
+
+# {
+#     "id_util": "105",
+#     "mail_util": "martin@gmail.com",
+#     "nom_util": "Martin",
+#     "password": "Xg5r7d",
+#     "prenom_util": "John"
+# }
