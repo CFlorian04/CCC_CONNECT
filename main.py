@@ -137,58 +137,57 @@ def get_objects():
 
         return jsonify({'objects': objects})
     
-    
-# SDC - Ajout d'un objet
-@app.route('/sdc/ajout', methods=['POST'])
-def sdc_ajout():
-    graph = Database_connect()
-    data = request.get_json()
-    #print(data)
-
-    
-    #query = """MATCH (u: Utilisateur {mail_util: $mail, password : $password}) RETURN u.id_util as user_id"""
-    #print(query)
-
-    #with graph.session() as session:
-    #    result = session.run(query, mail=mail, password= function.encrypt_password(password))
-    #    if result.single():
-    #        reponse = jsonify({'succes': True})
-    #    else:
-    #        reponse = jsonify({'succes': False})
-
-    graph.close()
-    return "reponse"
-
 # SDC - Requete routine
 @app.route('/sdc/routine', methods=['POST'])
 def sdc_routine():
-    graph = Database_connect()
+    graph = function.Database_connect()
     data = request.get_json()
-    print(data)
+    #print(data)
 
     composants = data.get('composants')
-    
+
     if composants:
-        for composant in composants :
+        # Parcourir les composants
+        for composant in composants:
             c_idObjet = composant.get("idObjet")
             c_libelleObjet = composant.get("libelleObjet")
             c_date_comp = composant.get("lastConnect")
             c_fonctions = composant.get("fonctions")
-            #print(str(c_idObjet) + "/" + c_libelleObjet + "/" + c_date_comp)
 
+            # Regarder si l'objet existe
             query = """MATCH (u: Objet {id_obj: $idObjet}) RETURN u"""
 
             with graph.session() as session:
                 result = session.run(query, idObjet=c_idObjet)
+
                 if result.single():
+                    # Mettre à jour l'objet existant
                     query2 = """MATCH (n:Objet {id_obj: $idObjet}) SET """
-                    set_clause = ''
-                    for fonction in c_fonctions :
+
+                    set_clause = f"n.lib_obj = '{c_libelleObjet}', n.date_lc_obj = '{c_date_comp}',"
+                    for fonction in c_fonctions:
                         set_clause += f"n.{fonction.get('libelle')} = '{json.dumps(fonction)}', "
                     set_clause = set_clause.rstrip(", ")
                     query2 += set_clause
-                    #print(query2)
+
                     result2 = session.run(query2, idObjet=c_idObjet)
+                elif c_idObjet == 0:
+                    # Créer un nouvel objet
+                    query_max_id = """MATCH (n:Objet) RETURN MAX(toInteger(n.id_obj)) AS max_id"""
+                    result_max_id = session.run(query_max_id)
+                    max_id = result_max_id.single()["max_id"]
+                    new_id = max_id + 1
+
+                    query2 = """CREATE (n:Objet {id_obj: $idObjet}) SET """
+
+                    set_clause = f"n.id_obj = '{new_id}', n.lib_obj = '{c_libelleObjet}', n.date_lc_obj = '{c_date_comp}',"
+                    for fonction in c_fonctions:
+                        set_clause += f"n.{fonction.get('libelle')} = '{json.dumps(fonction)}', "
+                    set_clause = set_clause.rstrip(", ")
+                    query2 += set_clause
+
+                    result2 = session.run(query2, idObjet=c_idObjet)
+
     graph.close()
     return jsonify({'succes': True})
 

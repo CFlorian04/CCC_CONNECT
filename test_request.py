@@ -1,11 +1,14 @@
 import requests
 
 #path = 'https://floriancodebecq.pythonanywhere.com/api'
+# path = 'https://floriancodebecq.pythonanywhere.com/api'
 path = 'http://192.168.0.45:5000/'
 url = path + 'sdc/routine'
 
 # myobj = { "id_util": "110", "mail_util": "codebecq.florian@gmail.com", "nom_util": "Codebecq", "password": "florian", "prenom_util": "Florian" }
 #myobj = {"mail": "codebe.florian@gmail.com", "password": "florian"}
+# myobj = {"mail": "codebe.florian@gmail.com", "password": "florian"}
+
 myobj = {
    "composants":[
       {
@@ -50,6 +53,7 @@ myobj = {
       }
    ]
 }
+
 
 x = requests.post(url, json=myobj)
 
