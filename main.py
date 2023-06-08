@@ -93,44 +93,6 @@ def get_objet():
             print(composant)
             return jsonify({'composant': composant})
 
-
-# recuperer la liste des objets IoT
-@app.route('/api/objets', methods=['GET'])
-def get_objets():
-    graph = Database_connect()
-    query = f"MATCH (u:Object) RETURN *"
-    print(query)
-    with graph.session() as session:
-        result = session.run(query)
-
-        for record in result:
-            objets = {}
-
-            for key in record["u"].keys():
-                print(key)
-                objets[key] = record["u"][key]
-
-        return jsonify({'objets': objets})
-
-# recuperer les infos d'un composant par son id
-@app.route('/api/objet', methods=['GET'])
-def get_objet():
-    graph = Database_connect()
-    id = request.args.get('id', default = 1, type = int)
-    query = f"MATCH (u:Objet) WHERE u.id_obj = {id} RETURN u"
-    with graph.session() as session:
-        result = session.run(query)
-
-        for record in result:
-            composant = {}
-
-            for key in record["u"].keys():
-                composant[key] = record["u"][key]
-
-            print(composant)
-            return jsonify({'composant': composant})
-
-
 @app.route('/connexion', methods=['POST'])
 def get_android_connexion():
     graph = Database_connect()
@@ -174,6 +136,8 @@ def get_objects():
                 objects[key] = record["u"][key]
 
         return jsonify({'objects': objects})
+    
+    
 # SDC - Ajout d'un objet
 @app.route('/sdc/ajout', methods=['POST'])
 def sdc_ajout():
@@ -230,4 +194,4 @@ def sdc_routine():
 
 if __name__ == '__main__':
     port = int(os.environ.get("PORT", 5000))
-    app.run(host='192.168.137.165', port=port)
+    app.run(host='10.10.8.219', port=port)
