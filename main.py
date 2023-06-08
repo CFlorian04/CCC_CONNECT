@@ -77,6 +77,24 @@ def get_objets():
 
         return jsonify({'objets': objets})
 
+# recuperer les infos d'un composant par son id
+@app.route('/api/objets', methods=['GET'])
+def get_objets():
+    graph = Database_connect()
+    id = request.args.get('id', default = 1, type = int)
+    query = f"MATCH (u:Objet) WHERE u.id_obj = {id} RETURN u"
+    with graph.session() as session:
+        result = session.run(query)
+
+        for record in result:
+            composant = {}
+
+            for key in record["u"].keys():
+                composant[key] = record["u"][key]
+
+            print(composant)
+            return jsonify({'composant': composant})
+
 
 # Android - Connexion
 @app.route('/connexion', methods=['POST'])
