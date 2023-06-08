@@ -155,8 +155,8 @@ def sdc_routine():
             c_idObjet = composant.get("idObjet")
             c_libelleObjet = composant.get("libelleObjet")
             c_date_comp = composant.get("lastConnect")
-            c_fonctions = composant.get("fonction")
-            print(str(c_idObjet) + "/" + c_libelleObjet + "/" + c_date_comp)
+            c_fonctions = composant.get("fonctions")
+            #print(str(c_idObjet) + "/" + c_libelleObjet + "/" + c_date_comp)
 
             query = """MATCH (u: Objet {id_obj: $idObjet}) RETURN u"""
 
@@ -169,7 +169,7 @@ def sdc_routine():
                         set_clause += f"n.{fonction.get('libelle')} = '{json.dumps(fonction)}', "
                     set_clause = set_clause.rstrip(", ")
                     query2 += set_clause
-                    print(query2)
+                    #print(query2)
                     result2 = session.run(query2, idObjet=c_idObjet)
     graph.close()
     return jsonify({'succes': True})
