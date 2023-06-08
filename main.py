@@ -77,6 +77,7 @@ def get_objets():
 
         return jsonify({'objets': objets})
 
+
 # Android - Connexion
 @app.route('/connexion', methods=['POST'])
 def get_android_connexion():
