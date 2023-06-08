@@ -3,9 +3,11 @@ import function
 from neo4j import GraphDatabase, basic_auth
 from flask import Flask, app, jsonify, request
 
-graph = GraphDatabase.driver("bolt://44.193.205.141:7687",auth=basic_auth("neo4j", "oscillator-runs-voids"))
 app = Flask(__name__)
 
+
+def Database_connect():
+    return GraphDatabase.driver("bolt://44.193.205.141:7687",auth=basic_auth("neo4j", "oscillator-runs-voids"))
 
 # Test
 @app.route('/')
@@ -16,6 +18,7 @@ def test():
 # recuperer un utilisateur par son id
 @app.route('/utilisateur', methods=['GET'])
 def get_utilisateur():
+    graph = Database_connect()
     id = request.args.get('id', default = 1, type = int)
     print(id)
     query = f"MATCH (u) WHERE u.id_util = {id} RETURN u"
@@ -38,6 +41,7 @@ def get_utilisateur():
 # creation d'un utilisateur
 @app.route('/utilisateur', methods=['POST'])
 def create_utilisateur():
+    graph = Database_connect()
     print("in post")
     data = request.get_json()
     print(data)
@@ -59,19 +63,26 @@ def create_utilisateur():
 # Android - Connexion
 @app.route('/connexion', methods=['POST'])
 def get_android_connexion():
+    graph = Database_connect()
     data = request.get_json()
     print(data)
 
     mail = data.get('mail')
     password = data.get('password')
 
-    query = f"MATCH (u) WHERE u.mail = {mail} RETURN u"
+    query = """MATCH (u: Utilisateur {mail_util: $mail, password : $password}) RETURN u.id_util as user_id"""
     print(query)
 
     with graph.session() as session:
-        result = session.run(query)
+        result = session.run(query, mail=mail, password= function.encrypt_password(password))
+        if result.single():
+            reponse = jsonify({'succes': True})
+        else:
+            reponse = jsonify({'succes': False})
 
-    return jsonify({'test': True})
+    graph.close()
+    return reponse
+
 
 
 if __name__ == '__main__':
