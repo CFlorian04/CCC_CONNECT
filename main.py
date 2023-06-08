@@ -52,7 +52,7 @@ def create_utilisateur():
     password = request.form.get('password')
 
     with graph.session() as session:
-        query = f"CREATE (p:Utilisateur {{id_util: '{id_util}', nom_util: '{nom_util}', prenom_util: '{prenom_util}', mail_util: '{mail_util}', password: '{password}'}})"
+        query = f"CREATE (p:Utilisateur {{id_util: '{id_util}', nom_util: '{nom_util}', prenom_util: '{prenom_util}', mail_util: '{mail_util}', password: '{function.encrypt_password(password)}'}})"
         result = session.run(query)
 
     return jsonify({'success': "True"})
@@ -93,6 +93,8 @@ def get_objet():
             print(composant)
             return jsonify({'composant': composant})
 
+
+# Vérifier la connexion Android
 @app.route('/connexion', methods=['POST'])
 def get_android_connexion():
     graph = Database_connect()
@@ -107,7 +109,7 @@ def get_android_connexion():
     print(query)
 
     with graph.session() as session:
-        result = session.run(query,  mail=email, password=password)
+        result = session.run(query,  mail=email, password=function.encrypt_password(password))
         count = result.single()["count"]
 
         if count > 0:
@@ -140,7 +142,7 @@ def get_objects():
 # SDC - Requete routine
 @app.route('/sdc/routine', methods=['POST'])
 def sdc_routine():
-    graph = function.Database_connect()
+    graph = Database_connect()
     data = request.get_json()
     #print(data)
 
@@ -196,6 +198,54 @@ def sdc_routine():
     graph.close()
     return jsonify({'succes': True})
 
+# SDC - Requete Inscription Appareil
+@app.route('/inscription_appareil', methods=['POST'])
+def inscription_appareil():
+    graph = Database_connect()
+    data = request.get_json()
+    #print(data)
+
+    device = data.get("device")
+    id_device = data.get("id")
+    public_key_device = data.get("public_key")
+
+    query = """MATCH (u: SDC {id_sdc: $idSDC}) RETURN u"""
+
+    with graph.session() as session:
+        result = session.run(query, idSDC=id_device)
+
+        #private_key = function.create_private_key()
+        #public_key = function.create_public_key(private_key)
+        #private_key = function.bytes_private_key(private_key)
+        #private_key = function.bytes_public_key(public_key)
+
+        private_key = "xxx"
+        public_key = "xxx"
+
+        cur_date = function.get_current_date()
+
+        if result.single():
+            # Mettre à jour le SDC
+            query2 = f"MATCH (n:SDC {{id_sdc: '{id_device}'}}) SET  n.public_key_sdc = '{public_key}', n.private_key_sdc = '{private_key}', n.exp_key_sdc = '{cur_date}' "
+            result2 = session.run(query2)
+        else :
+            # Créer le SDC
+            query_max_id = """MATCH (n:SDC) RETURN MAX(toInteger(n.id_sdc)) AS max_id"""
+            result_max_id = session.run(query_max_id)
+            max_id = result_max_id.single()["max_id"]
+            if max_id is None :
+                max_id = 0
+            new_id = max_id + 1
+            id_device = new_id
+            query2 = f"CREATE (p:SDC {{id_sdc: '{id_device}', public_key_sdc: '{public_key}', private_key_sdc: '{private_key}', exp_key_sdc: '{cur_date}'}})"
+            result2 = session.run(query2)
+    graph.close()
+    return jsonify({'succes': True, 'id': id_device, 'session_key': public_key})
+
+
+
+
+
 if __name__ == '__main__':
     port = int(os.environ.get("PORT", 5000))
-    app.run(host='10.10.8.219', port=port)
+    app.run(host='0.0.0.0', port=port)
