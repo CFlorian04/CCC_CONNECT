@@ -59,6 +59,24 @@ def create_utilisateur():
 
     return jsonify({'succes': True})
 
+# recuperer la liste des objets IoT
+@app.route('/api/objets', methods=['GET'])
+def get_objets():
+    graph = Database_connect()
+    query = f"MATCH (u:Object) RETURN *"
+    print(query)
+    with graph.session() as session:
+        result = session.run(query)
+
+        for record in result:
+            objets = {}
+
+            for key in record["u"].keys():
+                print(key)
+                objets[key] = record["u"][key]
+
+        return jsonify({'objets': objets})
+
 
 # Android - Connexion
 @app.route('/connexion', methods=['POST'])
