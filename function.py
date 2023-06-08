@@ -14,5 +14,5 @@ def encrypt_password(password):
     return encrypted_password
 
 def check_password(password, encrypted_password):
-    
     return encrypted_password == encrypt_password(password)
+

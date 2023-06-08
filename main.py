@@ -37,15 +37,25 @@ def get_utilisateur():
 @app.route('/utilisateur', methods=['POST'])
 def create_utilisateur():
     graph = Database_connect()
+
+    data = request.get_json()
  
-    id_util = request.form.get('id_util')
-    nom_util = request.form.get('nom_util')
-    prenom_util = request.form.get('prenom_util')
-    mail_util = request.form.get('mail_util')
-    password = request.form.get('password')
+    # id_util = request.form.get('id_util')
+    # nom_util = request.form.get('nom_util')
+    # prenom_util = request.form.get('prenom_util')
+    # mail_util = request.form.get('mail_util')
+    # password = request.form.get('password')
+
+    id_util = data.get('id_util')
+    nom_util = data.get('nom_util')
+    prenom_util = data.get('prenom_util')
+    mail_util = data.get('mail_util')
+    password = data.get('password')
+    
+    encrypt_password = function.encrypt_password(password)
 
     with graph.session() as session:
-        query = f"CREATE (p:Utilisateur {{id_util: '{id_util}', nom_util: '{nom_util}', prenom_util: '{prenom_util}', mail_util: '{mail_util}', password: '{function.encrypt_password(password)}'}})"
+        query = f"CREATE (p:Utilisateur {{id_util: '{id_util}', nom_util: '{nom_util}', prenom_util: '{prenom_util}', mail_util: '{mail_util}', password: '{encrypt_password}'}})"
         result = session.run(query)
 
     return jsonify({'success': "True"})
@@ -69,7 +79,7 @@ def get_object():
 
         return jsonify({'composant': composant})
 
-#connexion via l'application android
+#connexion android
 @app.route('/connexion', methods=['POST'])
 def get_android_connexion():
     graph = Database_connect()
@@ -84,7 +94,7 @@ def get_android_connexion():
     query = """MATCH (u:Utilisateur {mail_util: $mail, password : $password}) RETURN COUNT(u) AS count"""
 
     with graph.session() as session:
-        result = session.run(query,  mail=email, password=password)
+        result = session.run(query,  mail=email, password=function.encrypt_password(password))
         count = result.single()["count"]
 
         if count > 0:
