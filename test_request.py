@@ -1,6 +1,6 @@
 import requests
 
-path = 'http://192.168.0.45:5000/api/'
+path = 'https://floriancodebecq.pythonanywhere.com/api'
 url = path + 'connexion'
 
 # myobj = { "id_util": "110", "mail_util": "codebecq.florian@gmail.com", "nom_util": "Codebecq", "password": "florian", "prenom_util": "Florian" }

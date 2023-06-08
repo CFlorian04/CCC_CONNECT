@@ -6,8 +6,15 @@ from flask import Flask, app, jsonify, request
 graph = GraphDatabase.driver("bolt://44.193.205.141:7687",auth=basic_auth("neo4j", "oscillator-runs-voids"))
 app = Flask(__name__)
 
+
+# Test
+@app.route('/')
+def test():
+    return "Server Ok"
+
+
 # recuperer un utilisateur par son id
-@app.route('/api/utilisateur', methods=['GET'])
+@app.route('/utilisateur', methods=['GET'])
 def get_utilisateur():
     id = request.args.get('id', default = 1, type = int)
     print(id)
@@ -29,7 +36,7 @@ def get_utilisateur():
           
 
 # creation d'un utilisateur
-@app.route('/api/utilisateur', methods=['POST'])
+@app.route('/utilisateur', methods=['POST'])
 def create_utilisateur():
     print("in post")
     data = request.get_json()
@@ -50,7 +57,7 @@ def create_utilisateur():
 
 
 # Android - Connexion
-@app.route('/api/connexion', methods=['POST'])
+@app.route('/connexion', methods=['POST'])
 def get_android_connexion():
     data = request.get_json()
     print(data)
