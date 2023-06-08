@@ -1,26 +1,29 @@
 ###
-GET http://10.10.8.219:5000/utilisateur?id=100
+GET http://192.168.1.78:5000/utilisateur?id=100
 
 ###
-POST http://10.10.8.219:5000/utilisateur
+GET http://192.168.1.78:5000/object?id=100
+
+###
+GET http://192.168.1.78:5000/objects
+
+###
+POST http://192.168.1.78:5000/utilisateur
 Content-Type: application/json
 
 {
-    "id_util": 250,
-    "mail_util": "martin@gmail.com",
-    "nom_util": "Martin",
-    "password": "Xg5r7d",
-    "prenom_util": "John"
+    "id_util": 800,
+    "mail_util": "so@gmail.com",
+    "nom_util": "so",
+    "password": "1234",
+    "prenom_util": "om"
 }
 
 ###
-POST http://10.10.8.219:5000/connexion
+POST http://192.168.1.78:5000/connexion
 Content-Type: application/json
 
 {
-    "mail_util": "martin@gmail.com",
-    "password": "Xg5r7d"
+    "mail_util": "so@gmail.com",
+    "password": "1234"
 }
-
-###
-GET http://10.10.8.219:5000/objects

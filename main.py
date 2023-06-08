@@ -19,37 +19,40 @@ def test():
 def get_utilisateur():
     graph = Database_connect()
     id = request.args.get('id', default = 1, type = int)
-    print(id)
     query = f"MATCH (u : Utilisateur) WHERE u.id_util = {id} RETURN u"
-    print(query)
+
     with graph.session() as session:
         result = session.run(query)
         
         for record in result:
             utilisateur = {}
-            # print(record["u"].keys())
 
             for key in record["u"].keys():
-                print(key)
                 utilisateur[key] = record["u"][key]
                 
-            print(utilisateur)
             return jsonify({'utilisateur': utilisateur})
           
 
-# creation d'un utilisateur
+# creation d'un utilisateur - inscription
 @app.route('/utilisateur', methods=['POST'])
 def create_utilisateur():
     graph = Database_connect()
-    print("in post")
-    # data = request.get_json()
-    # print(data)
 
-    id_util = request.form.get('id_util')
-    nom_util = request.form.get('nom_util')
-    prenom_util = request.form.get('prenom_util')
-    mail_util = request.form.get('mail_util')
-    password = request.form.get('password')
+    data = request.get_json()
+ 
+    # id_util = request.form.get('id_util')
+    # nom_util = request.form.get('nom_util')
+    # prenom_util = request.form.get('prenom_util')
+    # mail_util = request.form.get('mail_util')
+    # password = request.form.get('password')
+
+    id_util = data.get('id_util')
+    nom_util = data.get('nom_util')
+    prenom_util = data.get('prenom_util')
+    mail_util = data.get('mail_util')
+    password = data.get('password')
+    
+    encrypt_password = function.encrypt_password(password)
 
     with graph.session() as session:
         query = f"CREATE (p:Utilisateur {{id_util: '{id_util}', nom_util: '{nom_util}', prenom_util: '{prenom_util}', mail_util: '{mail_util}', password: '{function.encrypt_password(password)}'}})"
@@ -57,65 +60,47 @@ def create_utilisateur():
 
     return jsonify({'success': "True"})
 
-# recuperer la liste des objets IoT
-@app.route('/api/objets', methods=['GET'])
-def get_objets():
-    graph = Database_connect()
-    query = f"MATCH (u:Object) RETURN *"
-    print(query)
-    with graph.session() as session:
-        result = session.run(query)
-
-        for record in result:
-            objets = {}
-
-            for key in record["u"].keys():
-                print(key)
-                objets[key] = record["u"][key]
-
-        return jsonify({'objets': objets})
-
+   
 # recuperer les infos d'un composant par son id
-@app.route('/api/objet', methods=['GET'])
-def get_objet():
+@app.route('/object', methods=['GET'])
+def get_object():    
     graph = Database_connect()
     id = request.args.get('id', default = 1, type = int)
+
     query = f"MATCH (u:Objet) WHERE u.id_obj = {id} RETURN u"
     with graph.session() as session:
         result = session.run(query)
 
         for record in result:
             composant = {}
-
+ 
             for key in record["u"].keys():
                 composant[key] = record["u"][key]
 
-            print(composant)
-            return jsonify({'composant': composant})
+        return jsonify({'composant': composant})
 
-
-# Vérifier la connexion Android
+#connexion android
 @app.route('/connexion', methods=['POST'])
 def get_android_connexion():
     graph = Database_connect()
-    #data = request.get_json()
+    data = request.get_json()
 
-    email = request.form.get('mail_util')
-    password = request.form.get('password')
+    # email = request.form.get('mail_util')
+    # password = request.form.get('password')
 
-    print(email, password)
+    email = data.get('mail_util')
+    password = data.get('password')
 
     query = """MATCH (u:Utilisateur {mail_util: $mail, password : $password}) RETURN COUNT(u) AS count"""
-    print(query)
 
     with graph.session() as session:
         result = session.run(query,  mail=email, password=function.encrypt_password(password))
         count = result.single()["count"]
 
         if count > 0:
-            reponse = jsonify({"success": "True"})
+            reponse = jsonify({"response": "True"})
         else:
-            reponse = jsonify({'success': "False"})
+            reponse = jsonify({'response': "False"})
 
     graph.close()
     return reponse
@@ -125,20 +110,18 @@ def get_android_connexion():
 def get_objects():
     graph = Database_connect()
     query = f"MATCH (u) RETURN *"
-    print(query)
+
     with graph.session() as session:
         result = session.run(query)
+        objects = []
 
         for record in result:
-            objects = {}
-            # print(record["u"].keys())
-
-            for key in record["u"].keys():
-                print(key)
-                objects[key] = record["u"][key]
+            obj = record["u"]
+            obj_dict = dict(obj)
+            objects.append(obj_dict)
 
         return jsonify({'objects': objects})
-    
+
 # SDC - Requete routine
 @app.route('/sdc/routine', methods=['POST'])
 def sdc_routine():
@@ -248,4 +231,4 @@ def inscription_appareil():
 
 if __name__ == '__main__':
     port = int(os.environ.get("PORT", 5000))
-    app.run(host='0.0.0.0', port=port)
+    app.run(host='192.168.1.78', port=port)
