@@ -171,6 +171,9 @@ def sdc_routine():
                     query2 += set_clause
 
                     result2 = session.run(query2, idObjet=c_idObjet)
+
+                    #Mettre l'historisation - Modification Objet ?
+
                 elif c_idObjet == 0:
                     # Créer un nouvel objet
                     query_max_id = """MATCH (n:Objet) RETURN MAX(toInteger(n.id_obj)) AS max_id"""
@@ -187,6 +190,8 @@ def sdc_routine():
                     query2 += set_clause
 
                     result2 = session.run(query2, idObjet=c_idObjet)
+
+                    #Mettre l'historisation - Ajout objet ?
 
     graph.close()
     return jsonify({'succes': True})
