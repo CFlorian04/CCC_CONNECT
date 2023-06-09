@@ -134,6 +134,7 @@ def sdc_routine():
     if composants:
         # Parcourir les composants
         for composant in composants:
+            c_idSDC = composant.get("idSDC")
             c_idObjet = composant.get("idObjet")
             c_libelleObjet = composant.get("libelleObjet")
             c_date_comp = composant.get("lastConnect")
@@ -164,7 +165,10 @@ def sdc_routine():
                     query_max_id = """MATCH (n:Objet) RETURN MAX(toInteger(n.id_obj)) AS max_id"""
                     result_max_id = session.run(query_max_id)
                     max_id = result_max_id.single()["max_id"]
+                    if max_id is None:
+                        max_id = 0
                     new_id = max_id + 1
+                    c_idObjet = new_id
 
                     query2 = """CREATE (n:Objet {id_obj: $idObjet}) SET """
 
@@ -175,6 +179,9 @@ def sdc_routine():
                     query2 += set_clause
 
                     result2 = session.run(query2, idObjet=c_idObjet)
+
+                    query3 = """MATCH (a:SDC),(b:Objet) WHERE a.id_SDC = '{c_idSDC}' AND b.id_obj = '{c_idObjet}' CREATE (a)-[r:possede]->(b)"""                    
+                    result3 = session.run(query3, idObjet=c_idObjet)
 
                     #Mettre l'historisation - Ajout objet ?
 
