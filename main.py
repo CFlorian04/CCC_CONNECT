@@ -233,8 +233,20 @@ def inscription_appareil():
     return jsonify({'succes': True, 'id': id_device, 'session_key': public_key})
 
 
+# SDC - Récupérer Commandes
+"""
+@app.route('/sdc/commande', methods=['GET'])
+def rec_commande():
+    graph = Database_connect()
+    data = request.get_json()
+    #print(data)
+    id_device = data.get("id")
 
 
+    
+    graph.close()
+    return jsonify({'succes': True, 'id': id_device, 'session_key': public_key})
+"""
 
 if __name__ == '__main__':
     port = int(os.environ.get("PORT", 5000))
