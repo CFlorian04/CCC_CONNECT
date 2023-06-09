@@ -43,23 +43,22 @@ def create_public_key(private_key) :
 
 def bytes_private_key(private_key) :
 
-    """
     private_hex = private_key.private_bytes(
         encoding=serialization.Encoding.PEM,
         format=serialization.PrivateFormat.PKCS8,
         encryption_algorithm=serialization.NoEncryption()
     ).hex()
-    """
-    return "0" #private_hex
+    
+    return private_hex
 
 def bytes_public_key(public_key) :
-    """
+    
     public_hex = public_key.public_bytes(
         encoding=serialization.Encoding.PEM,
         format=serialization.PublicFormat.SubjectPublicKeyInfo
     ).hex()
-    """
-    return "0" #public_hex
+    
+    return public_hex
 
 def crypted_message(message, public_key) :
     encrypted_message = public_key.encrypt(

@@ -181,7 +181,7 @@ def sdc_routine():
                     result2 = session.run(query2, idObjet=c_idObjet)
 
                     query3 = """MATCH (a:SDC),(b:Objet) WHERE a.id_SDC = '{c_idSDC}' AND b.id_obj = '{c_idObjet}' CREATE (a)-[r:possede]->(b)"""                    
-                    result3 = session.run(query3, idObjet=c_idObjet)
+                    result3 = session.run(query3)
 
                     #Mettre l'historisation - Ajout objet ?
 
